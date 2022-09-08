@@ -46,25 +46,28 @@ object ChatService {
         return true
     }
 
-    fun deleteMes(id_user: Int, id_mes: Int): Boolean {
-        val chat = chats[id_user] ?: throw NotFoundException("Чат с id равным $id_user не найден")
-        if (chat.message.size == 1) chats.remove(id_user)
-        else {
-            if (chat.message.size >= id_mes - 1) {
-                chat.message.removeAt(id_mes - 1)
-            } else throw NotFoundException("Сообщение с id равным $id_mes не найдено")
+        fun deleteMes(id_user: Int, id_mes: Int): Boolean {
+            val chat = chats[id_user] ?: throw NotFoundException("Чат с id равным $id_user не найден")
+            if (chat.message.size == 1) chats.remove(id_user)
+            else {
+                if (chat.message.size >= id_mes - 1) {
+                    chat.message.removeAt(id_mes - 1)
+                } else throw NotFoundException("Сообщение с id равным $id_mes не найдено")
+            }
+            return true
         }
-        return true
-    }
 
     fun getUnreadChatsCount(): Int {
         return chats.values.count { chat -> chat.message.any { !it.read } }
     }
 
-    fun getMes(id_user: Int, count: Int): List<Message> {
-        val chat = chats[id_user] ?: throw NotFoundException("Чат с id равным $id_user не найден")
-        return chat.message.takeLast(count).onEach { it.read = true }
-    }
+    fun getMes(id_user: Int, count: Int): List<Message> =
+        chats[id_user]
+            .let { it?.message ?: throw NotFoundException("Чат с id равным $id_user не найден") }
+            .takeLast(count)
+            .onEach { it.read = true }
+            .toList()
+
 
     fun getChats() {
         chats.forEach { (id_user, chat) -> println("$id_user=${chat.message.last()}") }
